@@ -1,0 +1,82 @@
+import pygame
+import sys
+
+# Oyunun başlatılması
+pygame.init()
+
+# Ekran boyutu
+WIDTH, HEIGHT = 600, 400
+
+# Renkler
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+
+# Paddle (raket) özellikleri
+PADDLE_WIDTH, PADDLE_HEIGHT = 10, 60
+paddle_speed = 5
+
+# Top özellikleri
+BALL_SIZE = 10
+ball_speed = [5, 5]
+
+# Pencere oluşturulması
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Simple Pong Game")
+
+# Paddle'ın oluşturulması
+paddle1 = pygame.Rect(50, HEIGHT // 2 - PADDLE_HEIGHT // 2, PADDLE_WIDTH, PADDLE_HEIGHT)
+paddle2 = pygame.Rect(WIDTH - 50 - PADDLE_WIDTH, HEIGHT // 2 - PADDLE_HEIGHT // 2, PADDLE_WIDTH, PADDLE_HEIGHT)
+
+# Topun oluşturulması
+ball = pygame.Rect(WIDTH // 2 - BALL_SIZE // 2, HEIGHT // 2 - BALL_SIZE // 2, BALL_SIZE, BALL_SIZE)
+
+# Oyun döngüsü
+clock = pygame.time.Clock()
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    # Oyuncunun hareketi
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w] and paddle1.top > 0:
+        paddle1.y -= paddle_speed
+    if keys[pygame.K_s] and paddle1.bottom < HEIGHT:
+        paddle1.y += paddle_speed
+    if keys[pygame.K_UP] and paddle2.top > 0:
+        paddle2.y -= paddle_speed
+    if keys[pygame.K_DOWN] and paddle2.bottom < HEIGHT:
+        paddle2.y += paddle_speed
+
+    # Topun hareketi
+    ball.x += ball_speed[0]
+    ball.y += ball_speed[1]
+
+    # Topun raketlere çarpma kontrolü
+    if ball.colliderect(paddle1) or ball.colliderect(paddle2):
+        ball_speed[0] = -ball_speed[0]
+
+    # Topun ekran kenarlarına çarpma kontrolü
+    if ball.top <= 0 or ball.bottom >= HEIGHT:
+        ball_speed[1] = -ball_speed[1]
+
+    # Topun skor çizgilerine çarpma kontrolü
+    if ball.left <= 0 or ball.right >= WIDTH:
+        ball_speed[0] = -ball_speed[0]
+        ball.x = WIDTH // 2 - BALL_SIZE // 2
+        ball.y = HEIGHT // 2 - BALL_SIZE // 2
+
+    # Ekran temizleme
+    screen.fill(BLACK)
+
+    # Raketleri ve topu çizme
+    pygame.draw.rect(screen, WHITE, paddle1)
+    pygame.draw.rect(screen, WHITE, paddle2)
+    pygame.draw.ellipse(screen, WHITE, ball)
+
+    # Ekranı güncelleme
+    pygame.display.flip()
+
+    # FPS ayarı
+    clock.tick(60)
